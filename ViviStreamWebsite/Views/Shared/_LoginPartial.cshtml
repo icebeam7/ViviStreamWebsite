@@ -9,8 +9,14 @@
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
-                <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+                <a asp-area="" asp-controller="MyPlaylist" asp-action="Index">Hello @UserManager.GetUserName(User)!</a>
             </li>
+            <li><a asp-area="" asp-controller="MyPlaylist" asp-action="Index">My Playlist</a></li>
+            @if (User.IsInRole("Moderator"))
+            {
+                <li><a asp-area="" asp-controller="BotTimers" asp-action="Index">Timers</a></li>
+                <li><a asp-area="" asp-controller="Tags" asp-action="Index">Stream Tags</a></li>
+            }
             <li>
                 <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
             </li>
@@ -20,7 +26,16 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-        <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
-        <li><a asp-area="" asp-controller="Account" asp-action="Login">Log in</a></li>
+        <li>
+            @{
+                var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                <form asp-action="../Account/ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
+                    @foreach (var provider in loginProviders)
+                    {
+                        <button type="submit" class="btn btn-link navbar-btn navbar-link" name="provider" value="@provider.Name" title="Log in with @provider.Name">Log in with @provider.Name</button>
+                    }
+                </form>
+            }
+        </li>
     </ul>
 }

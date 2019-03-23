@@ -1,0 +1,36 @@
+﻿@model ViviStreamWebsite.Models.AllSongs
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewData["Title"] = "Song Details";
+}
+
+<h3>Song Details</h3>
+
+<br />
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Song Info</h2>
+    </div>
+    <div class="panel-body">
+        <h4><b>@(Model.OriginalTitle)</b></h4>
+        <p><span title="ID" class="glyphicon glyphicon-pencil"></span>&nbsp;&nbsp;@(Model.RowKey)</p>
+        <p><span title="Game" class="glyphicon glyphicon-cd"></span>&nbsp;&nbsp;@(Model.OriginalGame)</p>
+        <p><span title="Channel" class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;@(Model.Channel)</p>
+        <p><span title="Duration" class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;@(Model.Duration)</p>
+        <p><span title="YouTube Link" class="glyphicon glyphicon-link"></span>&nbsp;&nbsp;<a href="@(Model.YouTubeLink)" target="_blank">@(Model.YouTubeLink)</a></p>
+    </div>
+</div>
+
+<br />
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Song Stats</h2>
+    </div>
+    <div class="panel-body">
+        <p><span title="Last Request" class="glyphicon glyphicon-calendar"></span>&nbsp;&nbsp;Last Request: @(Model.LastTimeRequested0)</p>
+        <p><span title="Times Requested" class="glyphicon glyphicon-music"></span>&nbsp;&nbsp;Times Requested: @(Model.Counter0)</p>
+        <p><span title="Likes" class="glyphicon glyphicon-thumbs-up"></span>&nbsp;&nbsp;Likes: @(Model.Likes0)</p>
+    </div>
+</div>

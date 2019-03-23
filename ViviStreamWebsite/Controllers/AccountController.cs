@@ -3,13 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
+using Google.Apis.Auth.OAuth2.Responses;
+using Google.Apis.Services;
+using Google.Apis.Util.Store;
+using Google.Apis.YouTube.v3;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using ViviStreamWebsite.Helpers;
 using ViviStreamWebsite.Models;
 using ViviStreamWebsite.Models.AccountViewModels;
 using ViviStreamWebsite.Services;
@@ -24,17 +33,20 @@ namespace ViviStreamWebsite.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
+        private IConfiguration _configuration;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [TempData]
@@ -278,9 +290,17 @@ namespace ViviStreamWebsite.Controllers
 
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in with {Name} provider.", info.LoginProvider);
+
+                var props = new AuthenticationProperties();
+                props.StoreTokens(info.AuthenticationTokens);
+
+                var channelID = await GetChannelID(info.AuthenticationTokens);
+                CookieService.Set(Response, Constants.ChannelCookieName, channelID);
+
                 return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
@@ -292,8 +312,20 @@ namespace ViviStreamWebsite.Controllers
                 // If the user does not have an account, then ask the user to create an account.
                 ViewData["ReturnUrl"] = returnUrl;
                 ViewData["LoginProvider"] = info.LoginProvider;
+
+                await ExternalLoginConfirmation(
+                    new ExternalLoginViewModel
+                    {
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        Name = info.Principal.FindFirstValue(ClaimTypes.Name),
+                    },
+                    returnUrl);
+
+                return RedirectToLocal(returnUrl);
+                /*
                 var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-                return View("ExternalLogin", new ExternalLoginViewModel { Email = email });
+                var name = info.Principal.FindFirstValue(ClaimTypes.Name);
+                return View("ExternalLogin", new ExternalLoginViewModel { Email = email, Name = name });*/
             }
         }
 
@@ -310,13 +342,19 @@ namespace ViviStreamWebsite.Controllers
                 {
                     throw new ApplicationException("Error loading external login information during confirmation.");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Name, Email = model.Email };
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
+                        var props = new AuthenticationProperties();
+                        props.StoreTokens(info.AuthenticationTokens);
+
+                        var channelID = await GetChannelID(info.AuthenticationTokens);
+                        CookieService.Set(Response, Constants.ChannelCookieName, channelID);
+
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
                         return RedirectToLocal(returnUrl);
@@ -457,6 +495,37 @@ namespace ViviStreamWebsite.Controllers
             {
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
+        }
+
+        private async Task<string> GetChannelID(IEnumerable<AuthenticationToken> tokens)
+        {
+            var flow = new ForceOfflineGoogleAuthorizationCodeFlow(
+                new GoogleAuthorizationCodeFlow.Initializer
+                {
+                    ClientSecrets = new ClientSecrets
+                    {
+                        ClientId = _configuration.GetSection("Google")["id"],
+                        ClientSecret = _configuration.GetSection("Google")["secret"]
+                    },
+                    Scopes = new string[] { YouTubeService.Scope.YoutubeReadonly },
+                    DataStore = new FileDataStore("ViviWebsite")
+                });
+
+            var token = new TokenResponse
+            {
+                AccessToken = tokens.Where(x => x.Name == "access_token").First().Value,
+                RefreshToken = tokens.Where(x => x.Name == "refresh_token").First().Value
+            };
+
+            var credential = new UserCredential(flow, Environment.UserName, token);
+
+            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = "ViviWebsite"
+            });
+
+            return await YouTubeApiService.GetChannelID(youtubeService);
         }
 
         #endregion

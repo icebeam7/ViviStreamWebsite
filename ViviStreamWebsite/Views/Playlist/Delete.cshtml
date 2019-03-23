@@ -1,0 +1,56 @@
+﻿@model ViviStreamWebsite.Models.AllSongs
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h3>Delete Song</h3>
+<h4>Are you sure you want to delete this?</h4>
+
+<hr />
+<div class="row">
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Title</label>
+        <div class="col-lg-8">
+            <input asp-for="OriginalTitle" class="form-control" placeholder="Pokemon Red, Yellow, Blue Battle Music- Trainer" disabled />
+            <span class="help-block">This is the song title.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Game</label>
+        <div class="col-lg-8">
+            <input asp-for="OriginalGame" class="form-control" placeholder="Pokémon Red/Blue/Green/Yellow" disabled />
+            <span class="help-block">This is the name of the video game this song is included in.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Channel</label>
+        <div class="col-lg-8">
+            <input asp-for="Channel" class="form-control" placeholder="pokemasterCrystal" disabled />
+            <span class="help-block">This is the name of the YouTube Channel which uploaded the song.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">YouTube link</label>
+        <div class="col-lg-8">
+            <input asp-for="YouTubeLink" class="form-control" placeholder="https://youtu.be/2Jmty_NiaXc" disabled />
+            <span class="help-block">This is the YouTube link where we can find the song.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Duration</label>
+        <div class="col-lg-8">
+            <input asp-for="Duration" class="form-control" placeholder="04:09" disabled />
+            <span class="help-block">This is the song length.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <form asp-action="Delete" asp-route-pk="@(Model.PartitionKey)" asp-route-rk="@(Model.RowKey)">
+            <label class="col-lg-2 control-label"></label>
+            <div class="col-lg-8">
+                <input type="submit" value="Delete" class="btn btn-primary btn-large" /> |
+                <a asp-action="Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+﻿@model ViviStreamWebsite.Models.Tags
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h3>Create a new Tag</h3>
+
+<hr />
+<div class="row">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Name"></label>
+            <div class="col-lg-8">
+                <input asp-for="Name" class="form-control" placeholder="thanksgiving" />
+                <span class="help-block">This is the tag name.</span>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Emoji"></label>
+            <div class="col-lg-8">
+                <input asp-for="Emoji" class="form-control" placeholder="🦃" />
+                <span class="help-block">This is the tag emoji.</span>
+                <span asp-validation-for="Emoji" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Description"></label>
+            <div class="col-lg-8">
+                <textarea asp-for="Description" class="form-control" placeholder="Thanksgiving Day tag"></textarea>
+                <span class="help-block">This is the tag description.</span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label"></label>
+            <div class="col-lg-6">
+                <input type="submit" value="Create" class="btn btn-primary btn-large" />
+                <input type="reset" value="Reset" class="btn btn-default" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

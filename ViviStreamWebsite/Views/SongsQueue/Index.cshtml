@@ -1,0 +1,150 @@
+﻿@model ViviStreamWebsite.Models.SongsInfo
+@inject SignInManager<ApplicationUser> SignInManager
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<link href="~/css/animate.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="~/css/borderless-table.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewData["Title"] = "Song Requests";
+}
+
+<h3>Current Stream Information</h3>
+<br />
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Current Song</h2>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td class="col-md-2" rowspan="5"><img src="data:image;base64,@System.Convert.ToBase64String(Model.GamePicture)" style="display:block; width:100%; height:auto;" /></td>
+                    </tr>
+                    <tr>
+                        <td class="col-md-10"><h4><b>@(Model.CurrentSong.Title)</b></h4></td>
+                    </tr>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;@(Model.CurrentSong.Duration)</p></td>
+                    </tr>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;@(Model.CurrentSong.RequestedBy)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="glyphicon glyphicon-link"></span>&nbsp;&nbsp;<a href="@(Model.CurrentSong.YouTubeLink)" target="_blank">@(Model.CurrentSong.YouTubeLink)</a></td>
+                    </tr>
+                    <tr>
+                        <td class="col-md-2 text-center"><span class="glyphicon glyphicon-cd"></span>&nbsp;&nbsp;@(Model.CurrentSong.OriginalGame)</p></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@if (SignInManager.IsSignedIn(User))
+{
+    <p>
+        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#requestSongModal">
+            <i class="fa fa-plus"></i> Request Song
+        </button>
+    </p>
+}
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Queue</h2>
+    </div>
+    <div class="panel-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 5%">#</th>
+                        <th style="width: 45%">Title</th>
+                        <th style="width: 15%">Artist</th>
+                        <th style="width: 15%">User</th>
+                        <th class="text-center" style="width: 6%">Duration</th>
+                        <th class="text-center" style="width: 6%">Counter</th>
+                        <th class="text-center" style="width: 8%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.SongsQueue)
+                    {
+                        <tr>
+                            <td class="text-center">@(p.Position)</td>
+                            <td>@(p.Title)</td>
+                            <td>@(p.Channel)</td>
+                            <td>@(p.RequestedBy)</td>
+                            <td class="text-center">@(p.Duration)</td>
+                            <td class="text-center">@(p.Counter)</td>
+                            <td class="text-center">
+                                @if (SignInManager.IsSignedIn(User))
+                                {
+                                    @if (User.IsInRole("Moderator"))
+                                    {
+                                        <a class="btn btn-danger btn-xs" title="Remove" href="@Url.Action("RemoveRequest", "SongsQueue", new { pk = p.PartitionKey, rk = p.RowKey })"><span><i class="fa fa-trash-o"></i></span></a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="requestSongModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Add Song to Queue</h4>
+            </div>
+            <form asp-action="RequestSong" asp-controller="SongsQueue" method="post"
+                  class="form-horizontal" name="formRequest" id="formRequest">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">Query</label>
+                            <div class="col-lg-9">
+                                <input type="text" class="form-control required" id="search" name="search" placeholder="beneath the mask">
+                                <span class="help-block">You can enter a term to search for (the closest match is chosen).</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a href="" class="btn btn-default" data-dismiss="modal">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/bootstrap-notify.js"></script>
+    <script type="text/javascript" src="~/js/helpers.js"></script>
+    <script type="text/javascript">
+        $('#formRequest').on('submit', function (e) {
+            var firstName = $('#search');
+
+            if (!firstName.val()) {
+                firstName.closest('.form-group').removeClass('has-success').addClass('has-error');
+                e.preventDefault();
+            } else {
+                firstName.closest('.form-group').removeClass('has-error').addClass('has-success');
+            }
+        });
+
+        var ac = getUrlParameter('ac');
+        var type = getUrlParameter('type');
+
+        if (type && ac)
+            showNotification(ac, type);
+    </script>
+}

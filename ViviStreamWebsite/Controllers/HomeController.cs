@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ViviStreamWebsite.Models;
+using ViviStreamWebsite.Services;
+using ViviStreamWebsite.Helpers;
+using Microsoft.WindowsAzure.Storage.Table;
+using System.Threading.Tasks;
 
 namespace ViviStreamWebsite.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var info = await TableStorageService.RetrieveEntity<StreamInfo>(Constants.StreamPartitionKey, "1", Constants.StreamInfoTableName);
+
+            if (info != null)
+                return View(info);
+            else
+                return View(new StreamInfo());
         }
 
         public IActionResult About()

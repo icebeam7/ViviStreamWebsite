@@ -1,0 +1,171 @@
+﻿@model ViviStreamWebsite.Models.PageCommands
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using X.PagedList.Mvc.Common;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<link href="~/css/animate.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+@{
+    ViewData["Title"] = "Commands";
+}
+
+<h3>Commands</h3>
+@if (User.IsInRole("Moderator"))
+{
+<p>
+    <a class="btn btn-primary btn-large" asp-action="Create">
+        <i class="fa fa-plus"></i> Add a new Command
+    </a>
+</p>
+}
+<br />
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Commands</h2>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            @using (Html.BeginForm("Index", "Commands", FormMethod.Get))
+            {
+                <div class="col-xs-6">
+                    <div style="display: flex">
+                        <label style="display: inline-block; line-height:35px;">Show &nbsp;</label>
+                        <select class="form-control input-sm" data-val="true" data-val-required="The PageSize field is required." id="PageSize" name="PageSize" style="width: auto">
+                            @foreach (var item in Model.PageSize)
+                            {
+                                if (item.Key == (int)(ViewBag.CurrentPageSize))
+                                {
+                                    <option value="@(item.Key)" selected="selected">@item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@(item.Key)">@item.Value</option>
+                                }
+                            }
+                        </select>
+                        <label style="display: inline-block; line-height:35px;">&nbsp; entries</label>
+                    </div>
+                </div>
+
+                <div class="col-xs-6">
+                    <div class="text-right">
+                        <p>
+                            Command or Message: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+                            <input type="submit" value="Search" class="btn btn-primary btn-sm" />
+                        </p>
+                    </div>
+                </div>
+                <div><input type="hidden" value="@ViewBag.CurrentSort" name="currentSort" /></div>
+            }
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 10%" class="text-center">
+                            @Html.ActionLink("Status", "Index", new { sortOrder = ViewBag.SortStatus, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
+                        </th>
+                        <th style="width: 10%">
+                            @Html.ActionLink("Command", "Index", new { sortOrder = ViewBag.SortCommand, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
+                        </th>
+                        <th style="width: 60%">
+                            @Html.ActionLink("Message", "Index", new { sortOrder = ViewBag.SortMessage, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
+                        </th>
+                        <th style="width: 10%">
+                            @Html.ActionLink("Userlevel", "Index", new { sortOrder = ViewBag.SortUserlevel, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
+                        </th>
+                        <th style="width: 10%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Commands)
+                    {
+                    <tr>
+                        <td class="text-center">
+                            @if (p.IsEnabled)
+                            {
+                                <span class="label label-primary">
+                                    @(p.IsEnabledMessage)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="label label-default">
+                                    @(p.IsEnabledMessage)
+                                </span>
+                            }
+                        </td>
+                        <td>@(p.Command)</td>
+                        <td>@(p.EncodedMessage)</td>
+                        <td>@(p.Userlevel)</td>
+                        @if (!p.IsStreamCommand)
+                        {
+                            <td class="text-center">
+                                @if (User.IsInRole("Moderator"))
+                                {
+                                    <a class="btn btn-warning btn-xs" title="Details" href="@Url.Action("Details", "Commands", new { pk = p.PartitionKey, rk = p.RowKey })"><span><i class="fa fa-info-circle"></i></span></a>
+                                    <a class="btn btn-info btn-xs" title="Edit" href="@Url.Action("Edit", "Commands", new { pk = p.PartitionKey, rk = p.RowKey })"><span><i class="fa fa-pencil-square-o"></i></span></a>
+                                    <a class="btn btn-danger btn-xs" title="Delete" href="@Url.Action("Delete", "Commands", new { pk = p.PartitionKey, rk = p.RowKey })"><span><i class="fa fa-trash-o"></i></span></a>
+                                }
+                                else
+                                {
+                                    <a class="btn btn-warning btn-xs" title="Details" href="@Url.Action("Details", "Commands", new { pk = p.PartitionKey, rk = p.RowKey })"><span><i class="fa fa-info-circle"></i></span></a>
+                                }
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-center">
+                                <a class="btn btn-warning btn-xs" title="Details" href="@Url.Action("Details", "Commands", new { command = p.Command })"><span><i class="fa fa-info-circle"></i></span></a>
+                            </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="text-right">
+    @Html.PagedListPager((IPagedList)Model.Commands,
+        page =>
+            Url.Action("Index",
+            new {
+                page, sortOrder = ViewBag.CurrentSort,
+                currentFilter = ViewBag.CurrentFilter,
+                pageSize = ViewBag.CurrentPageSize
+            }),
+            new PagedListRenderOptions {
+                LinkToFirstPageFormat = "First",
+                LinkToPreviousPageFormat = "Previous",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "Showing {0} to {1} of {2} entries",
+                LinkToNextPageFormat = "Next",
+                LinkToLastPageFormat = "Last",
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always
+            })
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/bootstrap-notify.js"></script>
+    <script type="text/javascript" src="~/js/helpers.js"></script>
+    <script type="text/javascript">
+        $('#PageSize').on('change', function (event) {
+            var form = $(event.target).parents('form');
+
+            form.submit();
+        });
+
+        var ac = getUrlParameter('ac');
+        var type = getUrlParameter('type');
+
+        if (type && ac)
+            showNotification(ac, type);
+    </script>
+}

@@ -1,0 +1,119 @@
+﻿@model ViviStreamWebsite.Models.BotTimers
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h3>Edit Timer</h3>
+
+<hr />
+<div class="row">
+    <form asp-action="Edit" asp-route-pk="@(Model.PartitionKey)" asp-route-rk="@(Model.RowKey)">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label">Timer</label>
+            <div class="col-lg-8">
+                <input asp-for="Name" class="form-control" placeholder="Social Links" data-val-required="The Name is required" />
+                <span class="help-block">
+                    This is your timer name. It has no significance but to remind you what this timer does.
+                </span>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Message"></label>
+            <div class="col-lg-8">
+                <textarea maxlength="200" asp-for="Message" class="form-control" placeholder="Subscribe to my YouTube channel: https://youtube.com/your/you/tube/link" data-val-required="The Message is required"></textarea>
+                <span id="MessageCount">0</span> / 200
+                <span class="help-block">This is your timer response. You can use command variables to make dynamic responses (max: 200 characters).</span>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Interval"></label>
+            <div class="col-lg-8">
+                <input asp-for="Interval" type="range" min="2" max="60" step="1" data-val="true" data-val-required="The Interval field is required." />
+                <span id="exIntervalLabel">every <span id="exIntervalValue">@(Model.Interval)</span> minutes</span>
+                <span class="help-block">
+                    This is interval at which the timer repeats. Times are exact per hour (for example: 15 minutes is at 2:00, 2:15, 2:30, 2:45, etc).
+                </span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label">Chat Lines</label>
+            <div class="col-lg-8">
+                <input asp-for="ChatLines" type="range" min="2" max="100" step="1" data-val="true" data-val-required="The ChatLines field is required." />
+                <span id="exChatLinesLabel"><span id="exChatLinesValue">@(Model.ChatLines)</span> lines</span>
+                <span class="help-block">
+                    This is minimum amount of chat lines (measured in lines per 5 minutes) required to activate the timer. If your chat is moving slow, this is useful to prevent LuisBot from spamming your empty channel.
+                </span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Alias"></label>
+            <div class="col-lg-8">
+                <input asp-for="Alias" class="form-control" placeholder="!commercial" />
+                <span class="help-block">
+                    If you want this timer to call a command, specify that command here. Note that the input passed to the listed alias is the message field above, so to pass data to the command you need to place it in the message field. You can also use most variables in the message field.
+                </span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label" asp-for="Status"></label>
+            <div class="col-lg-8">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" id="StatusEnabled" asp-for="Status" type="radio" value="true" />
+                    <label class="form-check-label" for="StatusEnabled">Enabled</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" id="StatusDisabled" asp-for="Status" type="radio" value="false" />
+                    <label class="form-check-label" for="StatusDisabled">Disabled</label>
+                </div>
+                <span class="help-block">
+                    If you want to enable or disable the timer.
+                </span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label">Is Visible?</label>
+            <div class="col-lg-8">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" id="VisibleEnabled" asp-for="IsVisible" type="radio" value="true" />
+                    <label class="form-check-label" for="VisibleEnabled">Yes</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" id="VisibleDisabled" asp-for="IsVisible" type="radio" value="false" />
+                    <label class="form-check-label" for="VisibleDisabled">No</label>
+                </div>
+                <span class="help-block">
+                    If you want to display the timer message on the stream.
+                </span>
+            </div>
+        </div>
+        <div class="row form-group">
+            <label class="col-lg-2 control-label"></label>
+            <div class="col-lg-6">
+                <input type="submit" value="Save" class="btn btn-primary btn-large" />
+                <input type="reset" value="Reset" class="btn btn-default" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/countchars.js"></script>
+
+    <script type="text/javascript">
+        $('#Interval').on('change', function (event) {
+            $('#exIntervalValue').text($(this).val());
+        });
+        $('#ChatLines').on('change', function (event) {
+            $('#exChatLinesValue').text($(this).val());
+        });
+    </script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

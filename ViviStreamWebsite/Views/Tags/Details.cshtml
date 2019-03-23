@@ -1,0 +1,39 @@
+﻿@model ViviStreamWebsite.Models.Tags
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h3>Tag Details</h3>
+
+<hr />
+<div class="row">
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Tag</label>
+        <div class="col-lg-8">
+            <input asp-for="Name" class="form-control" placeholder="thanksgiving" disabled />
+            <span class="help-block">This is the tag name.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Emoji</label>
+        <div class="col-lg-8">
+            <input asp-for="Emoji" class="form-control" placeholder="🦃" disabled />
+            <span class="help-block">This is the tag emoji.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Description</label>
+        <div class="col-lg-8">
+            <textarea asp-for="Description" class="form-control" placeholder="Thanksgiving Day tag" disabled></textarea>
+            <span class="help-block">This is the tag description.</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label"></label>
+        <div class="col-lg-6">
+            @Html.ActionLink("Edit", "Edit", new { pk = Model.PartitionKey, rk = Model.RowKey })
+            | <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</div>

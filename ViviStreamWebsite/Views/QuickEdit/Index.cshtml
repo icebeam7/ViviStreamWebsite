@@ -1,0 +1,169 @@
+﻿@model ViviStreamWebsite.Models.PageSongs
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using X.PagedList.Mvc.Common;
+@inject SignInManager<ApplicationUser> SignInManager
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<link href="~/css/animate.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+@{
+    ViewData["Title"] = "Quick Edit";
+    var size = Model.AllSongs.Count();
+    var songs = Model.AllSongs.ToList();
+}
+
+<h3>Quick Edit</h3>
+<br />
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h2 class="panel-title">Playlist</h2>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            @using (Html.BeginForm("Index", "QuickEdit", FormMethod.Get))
+            {
+                <div class="col-xs-6">
+                    <div style="display: flex">
+                        <label style="display: inline-block; line-height:35px;">Show &nbsp;</label>
+                        <select class="form-control input-sm" data-val="true" data-val-required="The PageSize field is required." id="PageSize" name="PageSize" style="width: auto">
+                            @foreach (var item in Model.PageSize)
+                            {
+                                if (item.Key == (int)(ViewBag.CurrentPageSize))
+                                {
+                                    <option value="@(item.Key)" selected="selected">@item.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@(item.Key)">@item.Value</option>
+                                }
+                            }
+                        </select>
+                        <label style="display: inline-block; line-height:35px;">&nbsp; entries</label>
+                    </div>
+                </div>
+
+                <div class="col-xs-6">
+                    <div class="text-right">
+                        <p>
+                            Song ID or Song Title: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+                            <input type="submit" value="Search" class="btn btn-primary btn-sm" />
+                        </p>
+                        <p class="form-check form-check-inline">
+                            @Html.CheckBox("CheckNew", ViewBag.CheckNew as bool?, new { onClick = "this.form.submit();" })
+                            <label class="form-check-label" for="CheckNew">Show newest additions/editions</label>
+                        </p>
+                    </div>
+                </div>
+                <div><input type="hidden" value="@ViewBag.CurrentSort" name="currentSort" /></div>
+            }
+        </div>
+
+        <div class="table-responsive">
+            <form asp-action="Save" 
+                  asp-route-items="@(size)" 
+                  asp-route-sortOrder="@(ViewBag.CurrentSort)" 
+                  asp-route-currentFilter="@(ViewBag.CurrentFilter)" 
+                  asp-route-searchString="@(ViewBag.CurrentFilter)" 
+                  asp-route-currentSort="@(ViewBag.CurrentSort)" 
+                  asp-route-page="@(ViewBag.Page)" 
+                  asp-route-pageSize="@(ViewBag.CurrentPageSize)"
+                  asp-route-checkNew="@(ViewBag.CheckNew)"
+                  >
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="text-right">
+                                <input type="submit" value="Save" class="btn btn-primary btn-large" />
+                                <input type="reset" value="Reset" class="btn btn-default" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-center" style="width: 6%">
+                                @Html.ActionLink("ID", "Index", new { sortOrder = ViewBag.SortNumber, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize, checkNew = ViewBag.CheckNew })
+                            </th>
+                            <th style="width: 50%">
+                                @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.SortTitle, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize, checkNew = ViewBag.CheckNew })
+                            </th>
+                            <th style="width: 44%">
+                                @Html.ActionLink("Game", "Index", new { sortOrder = ViewBag.SortGame, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize, checkNew = ViewBag.CheckNew })
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (int i = 0; i < songs.Count; i++)
+                    {
+                        var p = songs[i];
+                        <tr>
+                            <td class="text-center">
+                                @(p.RowKey)
+                                <input type="hidden" id="pk_@(i)" name="pk_@(i)" class="form-control" value="@(p.PartitionKey)" />
+                                <input type="hidden" id="rk_@(i)" name="rk_@(i)" class="form-control" value="@(p.RowKey)" />
+                            </td>
+                            <td>
+                                <input type="text" id="Title_@(i)" name="Title_@(i)" class="form-control" value="@(p.OriginalTitle)" />
+                            </td>
+                            <td>
+                                <input type="text" id="Game_@(i)" name="Game_@(i)" class="form-control" value="@(p.OriginalGame)" />
+                            </td>
+                        </tr>
+                    }
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="text-right">
+                                <input type="submit" value="Save" class="btn btn-primary btn-large" />
+                                <input type="reset" value="Reset" class="btn btn-default" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="text-right">
+    @Html.PagedListPager((IPagedList)Model.AllSongs,
+        page =>
+            Url.Action("Index",
+            new {
+                page, sortOrder = ViewBag.CurrentSort,
+                currentFilter = ViewBag.CurrentFilter,
+                pageSize = ViewBag.CurrentPageSize,
+                checkNew = ViewBag.CheckNew
+            }),
+            new PagedListRenderOptions {
+                LinkToFirstPageFormat = "First",
+                LinkToPreviousPageFormat = "Previous",
+                DisplayItemSliceAndTotal = true,
+                ItemSliceAndTotalFormat = "Showing {0} to {1} of {2} entries",
+                LinkToNextPageFormat = "Next",
+                LinkToLastPageFormat = "Last",
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always
+            })
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/bootstrap-notify.js"></script>
+    <script type="text/javascript" src="~/js/helpers.js"></script>
+    <script type="text/javascript">
+        $('#PageSize').on('change', function (event) {
+            var form = $(event.target).parents('form');
+
+            form.submit();
+        });
+
+        var ac = getUrlParameter('ac');
+        var type = getUrlParameter('type');
+
+        if (type && ac)
+            showNotification(ac, type);
+    </script>
+}

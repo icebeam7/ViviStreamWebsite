@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ViviStreamWebsite</title>
+    <title>Vivi's 24/7 Video Game Music Live Stream</title>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -26,13 +26,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">ViviStreamWebsite</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Vivi's Channel</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li><a asp-area="" asp-controller="SongsQueue" asp-action="Index">Stream Info</a></li>
+                    <li><a asp-area="" asp-controller="Playlist" asp-action="Index">Playlist</a></li>
+                    <li><a asp-area="" asp-controller="Commands" asp-action="Index">Commands</a></li>
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>
@@ -42,7 +43,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; 2018 - ViviStreamWebsite</p>
+            <p>&copy; 2018 - Vivi's Channel</p>
         </footer>
     </div>
 

@@ -1,0 +1,103 @@
+﻿@model ViviStreamWebsite.Models.BotTimers
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h3>Delete Timer</h3>
+<h4>Are you sure you want to delete this?</h4>
+
+<hr />
+<div class="row">
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Timer</label>
+        <div class="col-lg-8">
+            <input asp-for="Name" class="form-control" placeholder="Social Links" disabled />
+            <span class="help-block">
+                This is your timer name. It has no significance but to remind you what this timer does.
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Message</label>
+        <div class="col-lg-8">
+            <textarea asp-for="Message" class="form-control" placeholder="Subscribe to my YouTube channel: https://youtube.com/your/you/tube/link" disabled></textarea>
+            <span id="MessageCount">0</span> / 200
+            <span class="help-block">This is your timer response. You can use command variables to make dynamic responses (max: 200 characters).</span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Interval</label>
+        <div class="col-lg-8">
+            <input asp-for="Interval" type="range" min="2" max="60" step="1" data-val="true" data-val-required="The Interval field is required." disabled />
+            <span id="exIntervalLabel">every <span id="exIntervalValue">@(Model.Interval)</span> minutes</span>
+            <span class="help-block">
+                This is interval at which the timer repeats. Times are exact per hour (for example: 15 minutes is at 2:00, 2:15, 2:30, 2:45, etc).
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Chat Lines</label>
+        <div class="col-lg-8">
+            <input asp-for="ChatLines" type="range" min="2" max="100" step="1" data-val="true" data-val-required="The Interval field is required." disabled />
+            <span id="exIntervalLabel"><span id="exIntervalValue">@(Model.ChatLines)</span> lines</span>
+            <span class="help-block">
+                This is minimum amount of chat lines (measured in lines per 5 minutes) required to activate the timer. If your chat is moving slow, this is useful to prevent LuisBot from spamming your empty channel.
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Alias</label>
+        <div class="col-lg-8">
+            <input asp-for="Alias" class="form-control" placeholder="!commercial" disabled />
+            <span class="help-block">
+                If you want this timer to call a command, specify that command here. Note that the input passed to the listed alias is the message field above, so to pass data to the command you need to place it in the message field. You can also use most variables in the message field.
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Status</label>
+        <div class="col-lg-8">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="StatusEnabled" asp-for="Status" type="radio" value="true" disabled />
+                <label class="form-check-label" for="StatusEnabled">Enabled</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="StatusDisabled" asp-for="Status" type="radio" value="false" disabled />
+                <label class="form-check-label" for="StatusDisabled">Disabled</label>
+            </div>
+            <span class="help-block">
+                If you want to enable or disable the timer.
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <label class="col-lg-2 control-label">Is Visible?</label>
+        <div class="col-lg-8">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="VisibleEnabled" asp-for="IsVisible" type="radio" value="true" disabled />
+                <label class="form-check-label" for="VisibleEnabled">Yes</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="VisibleDisabled" asp-for="IsVisible" type="radio" value="false" disabled />
+                <label class="form-check-label" for="VisibleDisabled">No</label>
+            </div>
+            <span class="help-block">
+                If you want to display the timer message on the stream.
+            </span>
+        </div>
+    </div>
+    <div class="row form-group">
+        <form asp-action="Delete" asp-route-pk="@(Model.PartitionKey)" asp-route-rk="@(Model.RowKey)">
+            <label class="col-lg-2 control-label"></label>
+            <div class="col-lg-6">
+                <input type="submit" value="Delete" class="btn btn-primary btn-large" /> |
+                <a asp-action="Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/countchars.js"></script>
+}
